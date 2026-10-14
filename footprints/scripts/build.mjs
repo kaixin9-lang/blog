@@ -1,0 +1,25 @@
+import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
+import { posts } from '../content/posts.mjs';
+const root = new URL('../', import.meta.url);
+const site = JSON.parse(await readFile(new URL('content/site.json', root), 'utf8'));
+const dist = new URL('test-results/static/', root);
+import { createRenderer } from '../lib/render.mjs';
+const {shell,home,archive,about,article,icon,e,text,labels,href} = createRenderer(posts,site);
+async function save(name, html) { const url = new URL(name, dist); await mkdir(new URL('./', url), {recursive:true}); await writeFile(url, html); }
+await mkdir(dist, {recursive:true});
+await cp(new URL('src/assets/', root), new URL('assets/', dist), {recursive:true});
+await cp(new URL('src/style.css', root), new URL('style.css', dist));
+await cp(new URL('src/app.js', root), new URL('app.js', dist));
+await save('index.html', shell({title:'Footprints · vi 的生活与技术', content:home()}));
+await save('archive/index.html', shell({title:'文章归档 · Footprints', url:'/archive/', active:'archive', content:archive()}));
+await save('about/index.html', shell({title:'关于 vi · Footprints', url:'/about/', active:'about', content:about()}));
+for (const p of posts) await save('posts/' + p.slug + '/index.html', shell({title:p.title + ' · Footprints', description:p.excerpt, url:href(p), active:'posts', content:article(p), image:'/assets/' + p.image, article:p}));
+await save('write/index.html', shell({title:'写作 · Footprints', url:'/write/',active:'write',content:'<div class="container inner-page"><h1>写下新的足迹</h1><p>写作工作台需要服务器验证作者身份。</p></div>'}));
+await save('404.html', shell({title:'这一页还没有留下足迹 · Footprints', url:'/404.html', content:'<div class="container not-found"><span>404</span><h1>这一页，还没有留下足迹。</h1><p>链接可能已改变。回首页，看看最近的文字吧。</p><a class="primary-button" href="/">回到首页 ' + icon('arrow') + '</a></div>'}));
+await save('posts.json', JSON.stringify(posts.map(p => ({slug:p.slug,title:p.title,category:p.category,categoryLabel:labels[p.category],excerpt:p.excerpt,tags:p.tags,date:p.date,text:text(p)}))));
+const xml = (s) => e(s);
+await save('feed.xml', '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Footprints · vi 的生活与技术</title><link>' + site.origin + '</link><description>' + xml(site.description) + '</description><language>zh-CN</language>' + posts.map(p => '<item><title>' + xml(p.title) + (p.demo ? '（示例）' : '') + '</title><link>' + site.origin + href(p) + '</link><guid>' + site.origin + href(p) + '</guid><description>' + xml(p.excerpt) + '</description><pubDate>' + new Date(p.date + 'T00:00:00+08:00').toUTCString() + '</pubDate></item>').join('') + '</channel></rss>');
+await save('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ['/', '/about/', '/archive/', ...posts.map(href)].map(url => '<url><loc>' + site.origin + url + '</loc></url>').join('') + '</urlset>');
+await save('robots.txt', 'User-agent: *\nAllow: /\nSitemap: ' + site.origin + '/sitemap.xml\n');
+await save('_headers', '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n');
+console.log('Built Footprints: ' + posts.length + ' articles, home, archive, about, 404, RSS and sitemap.');

@@ -1,0 +1,10 @@
+import { build } from 'esbuild';
+import { mkdir, cp, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const root=new URL('../',import.meta.url);
+await mkdir(new URL('dist/assets/',root),{recursive:true});
+await cp(new URL('src/assets/',root),new URL('dist/assets/assets/',root),{recursive:true});
+for(const file of ['style.css','app.js','editor.css','editor.js','author.js'])await cp(new URL('src/'+file,root),new URL('dist/assets/'+file,root));
+await writeFile(new URL('dist/assets/_headers',root),'/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n');
+await build({entryPoints:[fileURLToPath(new URL('worker/index.mjs',root))],outfile:fileURLToPath(new URL('dist/worker/index.js',root)),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true});
+console.log('Built Cloudflare Worker and static assets.');

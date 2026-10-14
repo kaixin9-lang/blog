@@ -1,0 +1,20 @@
+# Dependencies, generated output and local runtime data
+node_modules/
+dist/
+.next/
+.wrangler/
+.runtime/
+.sites-runtime/
+test-results/
+.pr-work/
+
+# Local credentials; keep only the blank configuration examples
+.env*
+!.env.example
+.dev.vars*
+
+# Deployment archives and desktop files
+*.tar
+*.tar.gz
+.DS_Store
+Thumbs.db

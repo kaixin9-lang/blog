@@ -1,0 +1,17 @@
+dist/
+node_modules/
+*.tar.gz
+*.tar
+test-results/
+.sites-runtime/
+.wrangler/
+.env*
+!.env.example
+.dev.vars*
+.next/
+public/assets/
+public/style.css
+public/app.js
+public/editor.css
+public/editor.js
+public/robots.txt
