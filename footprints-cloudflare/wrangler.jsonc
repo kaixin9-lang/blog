@@ -1,0 +1,12 @@
+{
+  "$schema":"node_modules/wrangler/config-schema.json",
+  "name":"footprints-vi",
+  "account_id":"5aa3afb476cd1ef69bcf9947f7f5d56c",
+  "main":"dist/worker/index.js",
+  "compatibility_date":"2026-10-13",
+  "workers_dev":true,
+  "routes":[{"pattern":"footprints-vi.de5.net","custom_domain":true}],
+  "assets":{"directory":"dist/assets","binding":"ASSETS"},
+  "d1_databases":[{"binding":"DB","database_name":"footprints-vi","database_id":"ad261289-78ed-4b2e-90d5-eea1f1f5395f","migrations_dir":"migrations"}],
+  "observability":{"enabled":true,"head_sampling_rate":1,"traces":{"enabled":true,"head_sampling_rate":0.1}}
+}
